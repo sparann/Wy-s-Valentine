@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Be My Valentine? 💕</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --cream: #FFF5F5;
+            --pink-light: #FFE4E9;
+            --pink-medium: #FFB3C6;
+            --pink-vibrant: #FF6B9D;
+            --red-heart: #FF1744;
+            --shadow-soft: 0 8px 24px rgba(255, 107, 157, 0.15);
+            --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--pink-light) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            touch-action: none;
+        }
+
+        /* Animated background hearts */
+        .bg-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.1;
+            animation: float-up 15s infinite ease-in-out;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: white;
+            border-radius: 32px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 107, 157, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(32px, 8vw, 48px);
+            color: var(--red-heart);
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(255, 23, 68, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--pink-vibrant);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+
+        .drag-area {
+            margin-top: 30px;
+            min-height: 280px;
+        }
+
+        .draggable-cards {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .draggable {
+            width: 120px;
+            height: 140px;
+            background: linear-gradient(135deg, var(--pink-vibrant) 0%, var(--red-heart) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            cursor: grab;
+            user-select: none;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            touch-action: none;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .draggable.dragging {
+            opacity: 0.8;
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .draggable.yes {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF1744 100%);
+        }
+
+        .draggable.no {
+            background: linear-gradient(135deg, #FFB3C6 0%, #FF6B9D 100%);
+        }
+
+        .drop-zone {
+            width: 140px;
+            height: 160px;
+            border: 3px dashed var(--pink-medium);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--pink-vibrant);
+            font-weight: 600;
+            font-size: 14px;
+            background: rgba(255, 228, 233, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--red-heart);
+            background: rgba(255, 107, 157, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-zone .emoji {
+            font-size: 40px;
+            margin: 0;
+            display: block;
+            animation: bounce 2s infinite;
+            line-height: 1;
+        }
+
+        .drop-zone-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .dropped-card {
+            animation: pulse 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.3) rotate(5deg);
+            }
+            100% {
+                transform: scale(1.1) rotate(0deg);
+            }
+        }
+
+        .heart-particle, .confetti-particle {
+            position: absolute;
+            pointer-events: none;
+            animation: explode 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .heart-particle {
+            font-size: 24px;
+        }
+
+        .confetti-particle {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(1080deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes heartRain {
+            0% {
+                transform: translateY(-100px) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0) rotate(var(--rotation)) scale(1);
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(calc(var(--rotation) + 180deg)) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .heart-rain {
+            position: fixed;
+            animation: heartRain var(--duration) ease-in forwards;
+            font-size: var(--size);
+            left: var(--left);
+            top: 0;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        .final-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 1s ease;
+        }
+
+        .final-message.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .final-content {
+            text-align: center;
+            padding: 40px;
+            animation: scaleIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .final-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--pink-vibrant);
+            box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .final-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 48px;
+            color: var(--red-heart);
+            margin-bottom: 20px;
+        }
+
+        .final-subtext {
+            font-size: 20px;
+            color: var(--pink-vibrant);
+            font-weight: 600;
+        }
+
+        @media (max-width: 400px) {
+            .draggable {
+                width: 100px;
+                height: 120px;
+                font-size: 28px;
+            }
+
+            .drop-zone {
+                width: 100px;
+                height: 120px;
+                font-size: 12px;
+            }
+
+            .drop-zone .emoji {
+                font-size: 28px;
+            }
+
+            .drop-zone-content {
+                gap: 5px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-hearts" id="bgHearts"></div>
+
+    <div class="container">
+        <div class="card">
+            <h1>Will you be my Valentine?</h1>
+            <p class="subtitle">Drag your answer below 💕</p>
+
+            <div class="drag-area">
+                <div class="draggable-cards" id="draggableCards">
+                    <div class="draggable yes" data-answer="yes" draggable="false">
+                        Yes
+                    </div>
+                    <div class="draggable no" data-answer="no" draggable="false">
+                        No
+                    </div>
+                </div>
+
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-content">
+                        <span class="emoji">👇</span>
+                        <span>Drop here</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-animation" id="successAnimation"></div>
+
+    <div class="final-message" id="finalMessage">
+        <div class="final-content">
+            <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop" alt="Love" class="final-image" id="finalImage">
+            <div class="final-text">Yay! 💕</div>
+            <div class="final-subtext">I knew you'd say yes!</div>
+        </div>
+    </div>
+
+    <script>
+        // Background hearts animation
+        function createBackgroundHearts() {
+            const bgHearts = document.getElementById('bgHearts');
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'bg-heart';
+                heart.textContent = '💕';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 15 + 's';
+                heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                bgHearts.appendChild(heart);
+            }
+        }
+
+        createBackgroundHearts();
+
+        // Drag and drop functionality
+        const draggables = document.querySelectorAll('.draggable');
+        const dropZone = document.getElementById('dropZone');
+        const successAnimation = document.getElementById('successAnimation');
+        const finalMessage = document.getElementById('finalMessage');
+
+        let activeElement = null;
+        let initialX = 0;
+        let initialY = 0;
+        let currentX = 0;
+        let currentY = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Repulsion constants
+        const REPULSION_DISTANCE = 400;
+        const REPULSION_STRENGTH = 1.8;
+
+        function getDistance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+
+        function getDropZoneCenter() {
+            const rect = dropZone.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        }
+
+        function applyRepulsion(element, clientX, clientY) {
+            if (!element.classList.contains('no')) return { x: clientX, y: clientY };
+
+            const dropCenter = getDropZoneCenter();
+            const distance = getDistance(clientX, clientY, dropCenter.x, dropCenter.y);
+
+            if (distance < REPULSION_DISTANCE) {
+                const angle = Math.atan2(clientY - dropCenter.y, clientX - dropCenter.x);
+                const force = (1 - distance / REPULSION_DISTANCE) * REPULSION_STRENGTH * 60;
+
+                return {
+                    x: clientX + Math.cos(angle) * force,
+                    y: clientY + Math.sin(angle) * force
+                };
+            }
+
+            return { x: clientX, y: clientY };
+        }
+
+        function dragStart(e) {
+            activeElement = this;
+
+            const rect = activeElement.getBoundingClientRect();
+
+            if (e.type === 'touchstart') {
+                const touch = e.touches[0];
+                initialX = touch.clientX - offsetX;
+                initialY = touch.clientY - offsetY;
+                currentX = touch.clientX - rect.left;
+                currentY = touch.clientY - rect.top;
+            } else {
+                initialX = e.clientX - offsetX;
+                initialY = e.clientY - offsetY;
+                currentX = e.clientX - rect.left;
+                currentY = e.clientY - rect.top;
+            }
+
+            activeElement.classList.add('dragging');
+            activeElement.style.position = 'fixed';
+            activeElement.style.zIndex = '1000';
+        }
+
+        function drag(e) {
+            if (!activeElement) return;
+
+            e.preventDefault();
+
+            let clientX, clientY;
+
+            if (e.type === 'touchmove') {
+                const touch = e.touches[0];
+                clientX = touch.clientX;
+                clientY = touch.clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // Apply repulsion for "No" card
+            const adjusted = applyRepulsion(activeElement, clientX, clientY);
+
+            offsetX = adjusted.x - initialX;
+            offsetY = adjusted.y - initialY;
+
+            activeElement.style.left = (adjusted.x - currentX) + 'px';
+            activeElement.style.top = (adjusted.y - currentY) + 'px';
+
+            // Check if over drop zone
+            const rect = activeElement.getBoundingClientRect();
+            const dropRect = dropZone.getBoundingClientRect();
+
+            const cardCenterX = rect.left + rect.width / 2;
+            const cardCenterY = rect.top + rect.height / 2;
+
+            const isOver = cardCenterX > dropRect.left &&
+                          cardCenterX < dropRect.right &&
+                          cardCenterY > dropRect.top &&
+                          cardCenterY < dropRect.bottom;
+
+            if (isOver && activeElement.classList.contains('yes')) {
+                dropZone.classList.add('drag-over');
+            } else {
+                dropZone.classList.remove('drag-over');
+            }
+        }
+
+        function dragEnd(e) {
+            if (!activeElement) return;
+
+            const rect = activeElement.getBoundingClientRect();
+            const dropRect = dropZone.getBoundingClientRect();
+
+            // More lenient overlap detection - just need center of card over drop zone
+            const cardCenterX = rect.left + rect.width / 2;
+            const cardCenterY = rect.top + rect.height / 2;
+
+            const isOver = cardCenterX > dropRect.left &&
+                          cardCenterX < dropRect.right &&
+                          cardCenterY > dropRect.top &&
+                          cardCenterY < dropRect.bottom;
+
+            console.log('Drop attempt:', {
+                isOver,
+                cardType: activeElement.classList.contains('yes') ? 'yes' : 'no',
+                cardCenter: { x: cardCenterX, y: cardCenterY },
+                dropZone: { left: dropRect.left, right: dropRect.right, top: dropRect.top, bottom: dropRect.bottom }
+            });
+
+            if (isOver && activeElement.classList.contains('yes')) {
+                handleSuccess();
+            } else {
+                // Reset position
+                activeElement.style.position = '';
+                activeElement.style.left = '';
+                activeElement.style.top = '';
+                activeElement.style.zIndex = '';
+            }
+
+            activeElement.classList.remove('dragging');
+            dropZone.classList.remove('drag-over');
+            activeElement = null;
+            offsetX = 0;
+            offsetY = 0;
+        }
+
+        function handleSuccess() {
+            console.log('SUCCESS! Starting celebration...', activeElement);
+
+            // Save reference before clearing
+            const celebrationElement = activeElement;
+
+            // Position the card in the drop zone
+            const dropRect = dropZone.getBoundingClientRect();
+            celebrationElement.style.left = (dropRect.left + dropRect.width / 2 - 60) + 'px';
+            celebrationElement.style.top = (dropRect.top + dropRect.height / 2 - 70) + 'px';
+            celebrationElement.classList.add('dropped-card');
+
+            // Hide other elements
+            document.querySelectorAll('.draggable:not(.dropped-card)').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.3s';
+            });
+            dropZone.style.opacity = '0';
+            dropZone.style.transition = 'opacity 0.3s';
+
+            // Almost instant celebration
+            setTimeout(() => {
+                console.log('Creating explosion now!');
+                createExplosion(celebrationElement);
+
+                // Hide everything to show heart rain
+                setTimeout(() => {
+                    celebrationElement.style.opacity = '0';
+                    document.querySelector('.card').style.opacity = '0';
+                    document.querySelector('.card').style.transition = 'opacity 0.5s';
+                }, 200);
+
+                createHeartRain();
+
+                // Show final message AFTER hearts finish falling (3.5 seconds)
+                setTimeout(() => {
+                    console.log('Showing final message');
+                    finalMessage.classList.add('show');
+                }, 3500);
+            }, 100);
+        }
+
+        function createExplosion(element) {
+            console.log('createExplosion called!', element);
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            console.log('Explosion center:', centerX, centerY);
+
+            // Screen shake effect
+            document.body.style.animation = 'shake 0.5s ease';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 500);
+
+            console.log('Creating 80 hearts and 150 confetti...');
+
+            // Create TONS of hearts
+            for (let i = 0; i < 80; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle';
+                heart.textContent = ['💕', '💖', '💗', '💓', '💝', '❤️', '💗', '💖'][Math.floor(Math.random() * 8)];
+                heart.style.left = centerX + 'px';
+                heart.style.top = centerY + 'px';
+
+                const angle = (Math.PI * 2 * i) / 80 + (Math.random() * 0.2);
+                const distance = 150 + Math.random() * 300;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                heart.style.setProperty('--tx', tx + 'px');
+                heart.style.setProperty('--ty', ty + 'px');
+                heart.style.fontSize = (20 + Math.random() * 20) + 'px';
+
+                successAnimation.appendChild(heart);
+
+                setTimeout(() => heart.remove(), 2500);
+            }
+
+            // Create MASSIVE confetti storm
+            const colors = ['#FF6B9D', '#FF1744', '#FFB3C6', '#FF4081', '#FF80AB', '#FFE4E9', '#FF6B9D'];
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-particle';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = centerX + 'px';
+                confetti.style.top = centerY + 'px';
+                confetti.style.width = (8 + Math.random() * 6) + 'px';
+                confetti.style.height = (8 + Math.random() * 6) + 'px';
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 400;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
+                confetti.style.animationDelay = Math.random() * 0.3 + 's';
+                confetti.style.animationDuration = (1.5 + Math.random() * 1) + 's';
+
+                successAnimation.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 2500);
+            }
+
+            console.log('Explosion complete! Particles created.');
+        }
+
+        function createHeartRain() {
+            console.log('Starting heart rain!');
+
+            // Create a massive amount of hearts falling from the top
+            const heartTypes = ['💕', '💖', '💗', '💓', '💝', '❤️', '💕', '💖', '💗'];
+            const totalHearts = 200;
+
+            for (let i = 0; i < totalHearts; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart-rain';
+                    heart.textContent = heartTypes[Math.floor(Math.random() * heartTypes.length)];
+
+                    // Random position across screen width
+                    const leftPos = Math.random() * 100;
+                    heart.style.setProperty('--left', leftPos + '%');
+
+                    // Random size
+                    const size = 20 + Math.random() * 40;
+                    heart.style.setProperty('--size', size + 'px');
+
+                    // Random duration (2-3.5 seconds)
+                    const duration = 2 + Math.random() * 1.5;
+                    heart.style.setProperty('--duration', duration + 's');
+
+                    // Random rotation
+                    const rotation = Math.random() * 360;
+                    heart.style.setProperty('--rotation', rotation + 'deg');
+
+                    document.body.appendChild(heart);
+
+                    // Remove after animation
+                    setTimeout(() => heart.remove(), duration * 1000);
+                }, i * 15); // Stagger the hearts
+            }
+
+            console.log('Heart rain created!');
+        }
+
+        // Event listeners
+        draggables.forEach(draggable => {
+            // Touch events
+            draggable.addEventListener('touchstart', dragStart, { passive: false });
+
+            // Mouse events (for testing on desktop)
+            draggable.addEventListener('mousedown', dragStart);
+        });
+
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', dragEnd);
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+    </script>
+</body>
+</html>
